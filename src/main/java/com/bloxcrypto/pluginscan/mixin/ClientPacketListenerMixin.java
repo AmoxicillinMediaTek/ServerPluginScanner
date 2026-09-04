@@ -1,4 +1,4 @@
-package com.bloxcrypto.pluginscan;
+package com.bloxcrypto.pluginscan.mixin;
 
 import com.bloxcrypto.pluginscan.PluginScanScanner;
 import net.minecraft.client.multiplayer.ClientPacketListener;

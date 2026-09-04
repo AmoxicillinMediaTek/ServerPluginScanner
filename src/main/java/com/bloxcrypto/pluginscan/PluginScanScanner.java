@@ -25,7 +25,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 
-final class PluginScanScanner {
+public final class PluginScanScanner {
 	private static final Set<String> ANTICHEAT_WORDS = Set.of("nocheatplus",
 		"negativity", "vulcan", "spartan", "matrix", "grim", "themis", "kauri",
 		"godseye", "anticheat", "exploit", "illegal");
