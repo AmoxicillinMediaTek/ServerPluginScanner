@@ -1,4 +1,4 @@
-package com.ui_utils.uiutils;
+package com.bloxcrypto.pluginscan;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
@@ -25,7 +25,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
 
-public final class UiUtilsPluginScanner {
+final class PluginScanScanner {
 	private static final Set<String> ANTICHEAT_WORDS = Set.of("nocheatplus",
 		"negativity", "vulcan", "spartan", "matrix", "grim", "themis", "kauri",
 		"godseye", "anticheat", "exploit", "illegal");
@@ -83,7 +83,7 @@ public final class UiUtilsPluginScanner {
 	private static final List<String> recentEvents = new ArrayList<>();
 	private static String boundServerKey = "";
 
-	private UiUtilsPluginScanner() {}
+	private PluginScanScanner() {}
 
 	public static void init() {
 		// packet callbacks come from mixin
@@ -92,9 +92,9 @@ public final class UiUtilsPluginScanner {
 	public static String startScan() {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.getConnection() == null || mc.player == null)
-			return "[UI-Utils] Not connected.";
+			return "[PluginScan] Not connected.";
 		if (scanning)
-			return "[UI-Utils] Plugin scan already in progress.";
+			return "[PluginScan] Plugin scan already in progress.";
 
 		resetState();
 		scanning = true;
@@ -105,7 +105,7 @@ public final class UiUtilsPluginScanner {
 		queueProbeBatch(buildPluginProbes());
 		print("Plugin scan started. Probes: " + queuedProbes.size() + ".");
 		sendNextProbeIfReady(mc.player.connection);
-		return "[UI-Utils] Scanning plugins...";
+		return "[PluginScan] Scanning plugins...";
 	}
 
 	public static void onTick() {
@@ -192,7 +192,7 @@ public final class UiUtilsPluginScanner {
 			String pluginKey = normalizePluginKey(pluginCandidate);
 			if (!isLikelyPluginNameCandidate(pluginCandidate, probe.kind)
 				|| isOnlinePlayerName(pluginCandidate)
-				|| UiUtilsCommandScanner.isVanillaOrDefaultCommand(pluginCandidate)
+				|| PluginScanCommandScanner.isVanillaOrDefaultCommand(pluginCandidate)
 				|| isDefaultFabricPlugin(pluginCandidate)
 				|| ROOT_COMMAND_PLUGIN_ALIASES.containsKey(pluginKey))
 				continue;
@@ -250,11 +250,11 @@ public final class UiUtilsPluginScanner {
 
 	// ### ADDED ### Configuration-phase Known Packs outlive an active scan reset.
 	private static void mergePassiveKnownPacks() {
-		for (UiUtilsServerFingerprintCollector.KnownPackInfo pack
-			: UiUtilsServerFingerprintCollector.snapshot().knownPacks()) {
+		for (PluginScanServerFingerprintCollector.KnownPackInfo pack
+			: PluginScanServerFingerprintCollector.snapshot().knownPacks()) {
 			if ("minecraft".equalsIgnoreCase(pack.namespace()) && "core".equalsIgnoreCase(pack.id()))
 				continue;
-			String product = UiUtilsServerFingerprintCollector.friendlyName(pack.id());
+			String product = PluginScanServerFingerprintCollector.friendlyName(pack.id());
 			String display = pack.version() == null || pack.version().isBlank()
 				? product : product + " " + pack.version();
 			mergePluginEntry(display, List.of(), false, PluginEvidence.KNOWN_PACK);
@@ -315,7 +315,7 @@ public final class UiUtilsPluginScanner {
 		try {
 			connection.send(new ServerboundCommandSuggestionPacket(request.id, request.spec.query));
 		} catch (Exception e) {
-			UiUtils.LOGGER.warn("Failed to send plugin probe {}", request.spec.query, e);
+			PluginScan.LOGGER.warn("Failed to send plugin probe {}", request.spec.query, e);
 			pendingProbeIds.remove(request.id);
 		}
 		ticksUntilNextProbe = DEFAULT_PROBE_DELAY_TICKS;
@@ -516,13 +516,13 @@ public final class UiUtilsPluginScanner {
 			}
 		}
 
-		UiUtilsScanHistory.recordPlugins(boundServerKey, "plugin", lastRows);
+		PluginScanHistory.recordPlugins(boundServerKey, "plugin", lastRows);
 
 		if (ordered.isEmpty()) {
 			lastStatus = "No plugins found or blocked.";
 		} else {
 			lastStatus = "Detected " + ordered.size() + " plugins.";
-			Component line = Component.literal("[UI-Utils] Plugins (" + ordered.size() + "): ")
+			Component line = Component.literal("[PluginScan] Plugins (" + ordered.size() + "): ")
 				.withColor(0x55CCFF);
 			boolean first = true;
 			for (PluginEvidence evidence : List.of(PluginEvidence.KNOWN_PACK, PluginEvidence.COMMAND_TREE,
@@ -538,15 +538,15 @@ public final class UiUtilsPluginScanner {
 					first = false;
 					String lower = entry.displayName.toLowerCase(Locale.ROOT);
 					boolean anticheat = ANTICHEAT_WORDS.stream().anyMatch(lower::contains);
-					boolean vulnerable = UiUtilsVulnerablePlugins.keys()
-						.contains(UiUtilsVulnerablePlugins.normalizeKey(entry.displayName));
+					boolean vulnerable = PluginScanVulnerablePlugins.keys()
+						.contains(PluginScanVulnerablePlugins.normalizeKey(entry.displayName));
 					String text = (anticheat ? "!" : "") + entry.displayName
 						+ (entry.commands.isEmpty() ? "" : "{" + entry.commands.size() + "}");
 					int color = vulnerable ? 0xFF6B6B : 0x93F7A4;
 					line = line.copy().append(Component.literal(text).withColor(color));
 				}
 			}
-			mc.player.sendSystemMessage(line);
+			mc.player.displayClientMessage(line, false);
 		}
 
 		entries.clear();
@@ -557,10 +557,10 @@ public final class UiUtilsPluginScanner {
 		recentEvents.add(msg);
 		if (recentEvents.size() > 60)
 			recentEvents.remove(0);
-		if (UiUtilsSettings.get().commandScannerDebugProbe) {
+		if (PluginScanSettings.get().commandScannerDebugProbe) {
 			Minecraft mc = Minecraft.getInstance();
 			if (mc.player != null)
-				mc.player.sendSystemMessage(Component.literal("[UI-Utils] " + msg));
+				mc.player.displayClientMessage(Component.literal("[PluginScan] " + msg), false);
 		}
 	}
 
