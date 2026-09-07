@@ -1,6 +1,6 @@
-package com.bloxcrypto.pluginscan.mixin;
+package com.amoxicillinmediatek.pluginscan.mixin;
 
-import com.bloxcrypto.pluginscan.PluginScanScanner;
+import com.amoxicillinmediatek.pluginscan.PluginScanScanner;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundCommandSuggestionsPacket;
 import org.spongepowered.asm.mixin.Mixin;

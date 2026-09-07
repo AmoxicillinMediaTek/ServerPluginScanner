@@ -1,4 +1,4 @@
-package com.bloxcrypto.pluginscan;
+package com.amoxicillinmediatek.pluginscan;
 
 import java.util.Locale;
 import java.util.Set;

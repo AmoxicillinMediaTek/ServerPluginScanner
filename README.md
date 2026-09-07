@@ -4,7 +4,7 @@ PluginScan is a client-side Fabric mod for Minecraft 1.21.11 that scans a connec
 
 ## Features
 
-- Scan a connected server with `/plugscan`
+- Scan a connected server with `/pluginscan`
 - Detect plugin command namespaces and common plugin aliases
 - Report detected plugins in chat
 - Highlight likely anti-cheat plugins
@@ -29,7 +29,7 @@ PluginScan is a client-side Fabric mod for Minecraft 1.21.11 that scans a connec
 Run this command in the client chat while connected to a server:
 
 ```text
-/plugscan
+/pluginscan
 ```
 
 PluginScan will send a series of command suggestion probes and print the results when the scan finishes. A server may block or restrict these probes, so an empty result does not prove that no plugins are installed.
@@ -49,5 +49,5 @@ The compiled mod is written to `build/libs/pluginscan-1.0.0.jar`.
 - **Mod ID:** `pluginscan`
 - **Display name:** PluginScan
 - **Version:** `1.0.0`
-- **Author:** BloxCrypto
+- **Author:** AmoxicillinMediaTek
 - **License:** Not specified

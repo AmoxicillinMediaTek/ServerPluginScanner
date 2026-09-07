@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "com.bloxcrypto.pluginscan.mixin",
+  "package": "com.amoxicillinmediatek.pluginscan.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": ["ClientPacketListenerMixin"],
   "injectors": {"defaultRequire": 1}

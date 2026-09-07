@@ -1,4 +1,4 @@
-package com.bloxcrypto.pluginscan;
+package com.amoxicillinmediatek.pluginscan;
 
 final class PluginScanSettings {
     final boolean commandScannerDebugProbe;

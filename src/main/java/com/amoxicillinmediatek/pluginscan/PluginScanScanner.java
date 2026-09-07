@@ -1,4 +1,4 @@
-package com.bloxcrypto.pluginscan;
+package com.amoxicillinmediatek.pluginscan;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
@@ -522,9 +522,8 @@ public final class PluginScanScanner {
 			lastStatus = "No plugins found or blocked.";
 		} else {
 			lastStatus = "Detected " + ordered.size() + " plugins.";
-			Component line = Component.literal("[PluginScan] Plugins (" + ordered.size() + "): ")
-				.withColor(0x55CCFF);
-			boolean first = true;
+			List<PluginScanEntry> anticheatEntries = new ArrayList<>();
+			List<PluginScanEntry> pluginEntries = new ArrayList<>();
 			for (PluginEvidence evidence : List.of(PluginEvidence.KNOWN_PACK, PluginEvidence.COMMAND_TREE,
 				PluginEvidence.NAMESPACE, PluginEvidence.ROOT_HINT, PluginEvidence.HELP_HINT,
 				PluginEvidence.PLUGIN_LIST, PluginEvidence.VERSION_HINT, PluginEvidence.UNKNOWN)) {
@@ -532,25 +531,45 @@ public final class PluginScanScanner {
 				if (list == null || list.isEmpty())
 					continue;
 				list.sort((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.displayName, b.displayName));
-				for (PluginScanEntry entry : list) {
-					if (!first)
-						line = line.copy().append(Component.literal(", ").withColor(0xD0D0D0));
-					first = false;
-					String lower = entry.displayName.toLowerCase(Locale.ROOT);
-					boolean anticheat = ANTICHEAT_WORDS.stream().anyMatch(lower::contains);
-					boolean vulnerable = PluginScanVulnerablePlugins.keys()
-						.contains(PluginScanVulnerablePlugins.normalizeKey(entry.displayName));
-					String text = (anticheat ? "!" : "") + entry.displayName
-						+ (entry.commands.isEmpty() ? "" : "{" + entry.commands.size() + "}");
-					int color = vulnerable ? 0xFF6B6B : 0x93F7A4;
-					line = line.copy().append(Component.literal(text).withColor(color));
-				}
+				for (PluginScanEntry entry : list)
+					if (isAnticheat(entry.displayName))
+						anticheatEntries.add(entry);
+					else
+						pluginEntries.add(entry);
 			}
-			mc.player.displayClientMessage(line, false);
+
+			Component anticheatLine = Component.literal("[PluginScan] Anti-cheat ("
+				+ anticheatEntries.size() + "): ").withColor(0xFFB347);
+			anticheatLine = appendEntries(anticheatLine, anticheatEntries, 0xFF6B6B);
+			Component pluginLine = Component.literal("[PluginScan] Plugins ("
+				+ pluginEntries.size() + "): ").withColor(0x55CCFF);
+			pluginLine = appendEntries(pluginLine, pluginEntries, 0x93F7A4);
+			mc.player.displayClientMessage(anticheatLine, false);
+			mc.player.displayClientMessage(pluginLine, false);
 		}
 
 		entries.clear();
 		observedPluginCommands.clear();
+	}
+
+	private static boolean isAnticheat(String displayName) {
+		String lower = displayName.toLowerCase(Locale.ROOT);
+		return ANTICHEAT_WORDS.stream().anyMatch(lower::contains);
+	}
+
+	private static Component appendEntries(Component line, List<PluginScanEntry> entries, int color) {
+		if (entries.isEmpty())
+			return line.copy().append(Component.literal("None detected").withColor(0xD0D0D0));
+		boolean first = true;
+		for (PluginScanEntry entry : entries) {
+			if (!first)
+				line = line.copy().append(Component.literal(", ").withColor(0xD0D0D0));
+			first = false;
+			String text = entry.displayName
+				+ (entry.commands.isEmpty() ? "" : "{" + entry.commands.size() + "}");
+			line = line.copy().append(Component.literal(text).withColor(color));
+		}
+		return line;
 	}
 
 	private static void print(String msg) {

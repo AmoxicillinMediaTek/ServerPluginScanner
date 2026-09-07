@@ -4,10 +4,10 @@
   "version": "${version}",
   "name": "PluginScan",
   "description": "Client-side Minecraft server plugin scanner.",
-  "authors": ["BloxCrypto"],
+  "authors": ["AmoxicillinMediaTek"],
   "environment": "client",
   "entrypoints": {
-    "client": ["com.bloxcrypto.pluginscan.PluginScan"]
+    "client": ["com.amoxicillinmediatek.pluginscan.PluginScan"]
   },
   "mixins": ["pluginscan.mixins.json"],
   "depends": {
